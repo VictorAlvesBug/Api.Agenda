@@ -19,7 +19,6 @@ namespace Api.Agenda.Controllers
 		[HttpGet]
 		public async Task<IActionResult> Listar()
 		{
-			//ListaParametros pessoa = new ListaParametros();
 			IEnumerable<Pessoa> listaPessoas;
 			try
 			{

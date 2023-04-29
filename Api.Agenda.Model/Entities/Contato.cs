@@ -19,3 +19,4 @@ namespace Api.Agenda.Model.Entities
 		public Pessoa Pessoa { get; set; }
 		public TipoContato TipoContato { get; set; }
 	}
+}

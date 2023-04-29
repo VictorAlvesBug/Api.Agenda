@@ -18,7 +18,14 @@ namespace Api.Agenda.Business.Services
 
         public async Task<IEnumerable<Pessoa>> Listar()
 		{
-			return await _pessoaRepository.Listar();
+			var listaPessoas = await _pessoaRepository.Listar();
+
+			foreach (var pessoa in listaPessoas)
+			{
+				pessoa.ListaContatos = await _contatoRepository.Listar(pessoa.Codigo);
+			}
+
+			return listaPessoas;
 		}
 
 		public async Task<Pessoa> Retornar(int codigo)

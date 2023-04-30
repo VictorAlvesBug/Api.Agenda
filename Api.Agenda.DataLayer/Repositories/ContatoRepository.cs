@@ -12,7 +12,7 @@ namespace Api.Agenda.DataLayer.Repositories
 {
 	public class ContatoRepository : IContatoRepository
 	{
-		public async Task<IEnumerable<Contato>> Listar(int codigoPessoa)
+		public async Task<List<Contato>> Listar(int codigoPessoa)
 		{
 			using (var connection = await ConnectionFactory.ConexaoAsync("Agenda"))
 			{
@@ -26,7 +26,7 @@ namespace Api.Agenda.DataLayer.Repositories
 							AND CodigoPessoa = @codigoPessoa;
 						";
 
-				return await connection.QueryAsync<Contato>(query, new { codigoPessoa });
+				return (await connection.QueryAsync<Contato>(query, new { codigoPessoa })).ToList();
 			}
 		}
 
@@ -73,7 +73,6 @@ namespace Api.Agenda.DataLayer.Repositories
 						UPDATE
 							Contato
 						SET
-							CodigoPessoa = @CodigoPessoa,
 							CodigoTipoContato = @CodigoTipoContato,
 							Valor = @Valor
 						WHERE

@@ -66,12 +66,12 @@ namespace Api.Agenda.Controllers
 			}
 		}
 
-		[HttpGet("{codigo}")]
-		public async Task<IActionResult> Retornar(int codigo)
+		[HttpGet("{codigoPessoa}")]
+		public async Task<IActionResult> Retornar(int codigoPessoa)
 		{
 			try
 			{
-				Pessoa pessoa = await _pessoaService.Retornar(codigo);
+				Pessoa pessoa = await _pessoaService.Retornar(codigoPessoa);
 
 				if (pessoa == null)
 				{
@@ -83,13 +83,13 @@ namespace Api.Agenda.Controllers
 					new Link
 					{
 						Rel = "self",
-						Href = $"/api/pessoas/{codigo}",
+						Href = $"/api/pessoas/{codigoPessoa}",
 						Method = "GET"
 					},
 					new Link
 					{
 						Rel = "collection",
-						Href = $"/api/pessoas/{codigo}/contatos",
+						Href = $"/api/pessoas/{codigoPessoa}/contatos",
 						Method = "GET"
 					},
 					new Link
@@ -152,12 +152,12 @@ namespace Api.Agenda.Controllers
 			}
 		}
 
-		[HttpPut("{codigo}")]
-		public async Task<IActionResult> Alterar(int codigo, [FromBody] Pessoa pessoa)
+		[HttpPut("{codigoPessoa}")]
+		public async Task<IActionResult> Alterar(int codigoPessoa, [FromBody] Pessoa pessoa)
 		{
 			try
 			{
-				if (await _pessoaService.Alterar(codigo, pessoa))
+				if (await _pessoaService.Alterar(codigoPessoa, pessoa))
 				{
 					var links = new List<Link>
 					{
@@ -194,12 +194,12 @@ namespace Api.Agenda.Controllers
 			}
 		}
 
-		[HttpDelete("{codigo}")]
-		public async Task<IActionResult> Desativar(int codigo)
+		[HttpDelete("{codigoPessoa}")]
+		public async Task<IActionResult> Desativar(int codigoPessoa)
 		{
 			try
 			{
-				if (await _pessoaService.Desativar(codigo))
+				if (await _pessoaService.Desativar(codigoPessoa))
 				{
 					return NoContent();
 				}

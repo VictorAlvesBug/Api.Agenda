@@ -12,7 +12,7 @@ namespace Api.Agenda.DataLayer.Repositories
 {
 	public class TipoContatoRepository : ITipoContatoRepository
 	{
-		public async Task<IEnumerable<TipoContato>> Listar()
+		public async Task<List<TipoContato>> Listar()
 		{
 			using (var connection = await ConnectionFactory.ConexaoAsync("Agenda"))
 			{
@@ -25,7 +25,7 @@ namespace Api.Agenda.DataLayer.Repositories
 							Ativo = 1;
 						";
 
-				return await connection.QueryAsync<TipoContato>(query);
+				return (await connection.QueryAsync<TipoContato>(query)).ToList();
 			}
 		}
 

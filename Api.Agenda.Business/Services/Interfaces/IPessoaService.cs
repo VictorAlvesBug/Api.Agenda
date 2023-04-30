@@ -9,7 +9,7 @@ namespace Api.Agenda.Business.Services.Interfaces
 {
 	public interface IPessoaService
 	{
-		Task<IEnumerable<Pessoa>> Listar();
+		Task<List<Pessoa>> Listar();
 		Task<Pessoa> Retornar(int codigo);
 		Task<bool> Cadastrar(Pessoa pessoa);
 		Task<bool> Alterar(int codigo, Pessoa pessoa);

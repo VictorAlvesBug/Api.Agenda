@@ -16,7 +16,7 @@ namespace Api.Agenda.Business.Services
 			_contatoRepository = contatoRepository;
 		}
 
-        public async Task<IEnumerable<Pessoa>> Listar()
+        public async Task<List<Pessoa>> Listar()
 		{
 			return await _pessoaRepository.Listar();
 		}
@@ -95,7 +95,7 @@ namespace Api.Agenda.Business.Services
 			return strComparacaoContatosAntigos != strComparacaoContatosNovos;
 		}
 
-		private string RetornarStringComparacaoContatos(IEnumerable<Contato> listaContatos)
+		private string RetornarStringComparacaoContatos(List<Contato> listaContatos)
 		{
 			if (listaContatos == null)
 				return string.Empty;

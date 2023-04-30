@@ -10,6 +10,7 @@ namespace Api.Agenda.Initializers
 		public void Initialize(IServiceCollection services)
 		{
 			services.AddTransient<IPessoaService, PessoaService>();
+			services.AddTransient<IContatoService, ContatoService>();
 		}
 	}
 }

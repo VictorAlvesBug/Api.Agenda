@@ -5,14 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Api.Agenda.DataLayer.Repositories.Interfaces
+namespace Api.Agenda.Business.Services.Interfaces
 {
-	public interface IContatoRepository
+	public interface IContatoService
 	{
 		Task<List<Contato>> Listar(int codigoPessoa);
 		Task<Contato> Retornar(int codigo);
-		Task<int> Cadastrar(Contato contato);
-		Task<bool> Alterar(Contato contato);
+		Task<bool> Cadastrar(Contato contato);
+		Task<bool> Alterar(int codigo, Contato contato);
 		Task<bool> Desativar(int codigo);
 	}
 }

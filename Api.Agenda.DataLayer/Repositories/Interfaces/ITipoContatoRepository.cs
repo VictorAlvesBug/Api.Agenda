@@ -9,7 +9,7 @@ namespace Api.Agenda.DataLayer.Repositories.Interfaces
 {
 	public interface ITipoContatoRepository
 	{
-		Task<IEnumerable<TipoContato>> Listar();
+		Task<List<TipoContato>> Listar();
 		Task<TipoContato> Retornar(int codigo);
 		Task<int> Cadastrar(TipoContato tipoContato);
 		Task<bool> Alterar(TipoContato tipoContato);

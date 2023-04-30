@@ -12,7 +12,7 @@ namespace Api.Agenda.DataLayer.Repositories
 {
 	public class PessoaRepository : IPessoaRepository
 	{
-		public async Task<IEnumerable<Pessoa>> Listar()
+		public async Task<List<Pessoa>> Listar()
 		{
 			using (var connection = await ConnectionFactory.ConexaoAsync("Agenda"))
 			{

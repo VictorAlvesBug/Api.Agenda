@@ -36,7 +36,7 @@ namespace Api.Agenda.DataLayer.ConnectionFactories
 			return con;
 		}
 
-		public static async Task<IDbConnection> ConexaoAsync(string banco, bool webConfig = false)
+		public static async Task<IDbConnection> ConexaoAsync(string banco)
 		{
 			return await new ConnectionFactory().AbrirConexaoAsync(banco);
 		}

@@ -10,9 +10,13 @@ namespace Api.Agenda.Controllers
 	public class ContatoController : ControllerBase
 	{
 		private readonly IContatoService _contatoService;
-		public ContatoController(IContatoService contatoService)
+		private readonly IUnitOfWork _unitOfWork;
+		public ContatoController(
+			IContatoService contatoService,
+			IUnitOfWork unitOfWork)
 		{
 			_contatoService = contatoService;
+			_unitOfWork = unitOfWork;
 		}
 
 		[HttpGet("{codigoPessoa}/contatos")]
@@ -20,10 +24,13 @@ namespace Api.Agenda.Controllers
 		{
 			try
 			{
+				_unitOfWork.BeginTransaction();
+
 				List<Contato> listaContatos = await _contatoService.Listar(codigoPessoa);
 
 				if (listaContatos == null)
 				{
+					_unitOfWork.Rollback();
 					return NotFound();
 				}
 
@@ -49,10 +56,12 @@ namespace Api.Agenda.Controllers
 
 				var retorno = new Recurso<List<Contato>>(listaContatos, links);
 
+				_unitOfWork.Commit();
 				return Ok(retorno);
 			}
 			catch (Exception ex)
 			{
+				_unitOfWork.Rollback();
 				return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
 			}
 		}
@@ -62,10 +71,13 @@ namespace Api.Agenda.Controllers
 		{
 			try
 			{
+				_unitOfWork.BeginTransaction();
+
 				Contato contato = await _contatoService.Retornar(codigoContato);
 
 				if (contato == null)
 				{
+					_unitOfWork.Rollback();
 					return NotFound();
 				}
 
@@ -93,10 +105,12 @@ namespace Api.Agenda.Controllers
 
 				var retorno = new Recurso<Contato>(contato, links);
 
+				_unitOfWork.Commit();
 				return Ok(retorno);
 			}
 			catch (Exception ex)
 			{
+				_unitOfWork.Rollback();
 				return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
 			}
 		}
@@ -106,6 +120,8 @@ namespace Api.Agenda.Controllers
 		{
 			try
 			{
+				_unitOfWork.BeginTransaction();
+
 				contato.CodigoPessoa = codigoPessoa;
 
 				if (await _contatoService.Cadastrar(contato))
@@ -134,6 +150,7 @@ namespace Api.Agenda.Controllers
 
 					var retorno = new Recurso<Contato>(contato, links);
 
+					_unitOfWork.Commit();
 					return Created($"/api/pessoas/{codigoPessoa}/contatos/{contato.Codigo}", retorno);
 				}
 
@@ -141,6 +158,7 @@ namespace Api.Agenda.Controllers
 			}
 			catch (Exception ex)
 			{
+				_unitOfWork.Rollback();
 				return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
 			}
 		}
@@ -150,6 +168,8 @@ namespace Api.Agenda.Controllers
 		{
 			try
 			{
+				_unitOfWork.BeginTransaction();
+
 				if (await _contatoService.Alterar(codigoContato, contato))
 				{
 					var links = new List<Link>
@@ -176,13 +196,16 @@ namespace Api.Agenda.Controllers
 
 					var retorno = new Recurso<Contato>(contato, links);
 
+					_unitOfWork.Commit();
 					return Ok(retorno);
 				}
 
+				_unitOfWork.Rollback();
 				return NotFound();
 			}
 			catch (Exception ex)
 			{
+				_unitOfWork.Rollback();
 				return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
 			}
 		}
@@ -192,15 +215,20 @@ namespace Api.Agenda.Controllers
 		{
 			try
 			{
+				_unitOfWork.BeginTransaction();
+
 				if (await _contatoService.Desativar(codigoContato))
 				{
+					_unitOfWork.Commit();
 					return NoContent();
 				}
 
+				_unitOfWork.Rollback();
 				return NotFound();
 			}
 			catch (Exception ex)
 			{
+				_unitOfWork.Rollback();
 				return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
 			}
 		}

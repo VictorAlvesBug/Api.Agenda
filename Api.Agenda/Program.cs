@@ -8,6 +8,7 @@ builder.Services.AddControllers();
 
 new BusinessInitializer().Initialize(builder.Services);
 new DataLayerInitializer().Initialize(builder.Services);
+new UnitOfWorkInitializer().Initialize(builder.Services);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

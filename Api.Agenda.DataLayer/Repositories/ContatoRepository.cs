@@ -4,6 +4,7 @@ using Api.Agenda.Model.Entities;
 using Dapper;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,46 +13,99 @@ namespace Api.Agenda.DataLayer.Repositories
 {
 	public class ContatoRepository : IContatoRepository
 	{
+		private readonly IDbSession _dbSession;
+
+		public ContatoRepository(IDbSession dbSession)
+		{
+			_dbSession = dbSession;
+		}
+
 		public async Task<List<Contato>> Listar(int codigoPessoa)
 		{
-			using (var connection = await ConnectionFactory.ConexaoAsync("Agenda"))
-			{
-				string query = @"
+			IDbConnection connection = await _dbSession.GetConnectionAsync("Agenda");
+			string query = @"
 						SELECT
-							*
+							Contato.Codigo,
+							Contato.CodigoPessoa,
+							Contato.CodigoTipoContato,
+							Contato.Valor,
+							Contato.DataHoraCadastro,
+							Contato.Ativo,
+							TipoContato.Codigo,
+							TipoContato.Nome,
+							TipoContato.RegexValidacao,
+							TipoContato.DataHoraCadastro,
+							TipoContato.Ativo
 						FROM
 							Contato
+							INNER JOIN TipoContato
+								ON Contato.CodigoTipoContato = TipoContato.Codigo
 						WHERE
-							Ativo = 1
-							AND CodigoPessoa = @codigoPessoa;
+							Contato.Ativo = 1
+							AND Contato.CodigoPessoa = @codigoPessoa;
 						";
 
-				return (await connection.QueryAsync<Contato>(query, new { codigoPessoa })).ToList();
-			}
+			var lookupContato = new Dictionary<int, Contato>();
+
+			await connection.QueryAsync<Contato, TipoContato, Contato>(query, 
+				(contato, tipoContato) => 
+				{
+					if(!lookupContato.TryGetValue(contato.Codigo, out var contatoExistente))
+					{
+						contatoExistente = contato;
+						lookupContato.Add(contato.Codigo, contatoExistente);
+					}
+
+					contatoExistente.TipoContato = tipoContato;
+
+					return null;
+				},
+				new { codigoPessoa },
+				splitOn:"Codigo",
+				transaction: _dbSession.Transaction);
+
+			return lookupContato.Values.ToList();
 		}
 
 		public async Task<Contato> Retornar(int codigo)
 		{
-			using (var connection = await ConnectionFactory.ConexaoAsync("Agenda"))
-			{
-				string query = @"
+			IDbConnection connection = await _dbSession.GetConnectionAsync("Agenda");
+			string query = @"
 						SELECT
-							*
+							Contato.Codigo,
+							Contato.CodigoPessoa,
+							Contato.CodigoTipoContato,
+							Contato.Valor,
+							Contato.DataHoraCadastro,
+							Contato.Ativo,
+							TipoContato.Codigo,
+							TipoContato.Nome,
+							TipoContato.RegexValidacao,
+							TipoContato.DataHoraCadastro,
+							TipoContato.Ativo
 						FROM
 							Contato
+							INNER JOIN TipoContato
+								ON Contato.CodigoTipoContato = TipoContato.Codigo
 						WHERE
-							Codigo = @codigo;
+							Contato.Codigo = @codigo;
 						";
 
-				return await connection.QueryFirstOrDefaultAsync<Contato>(query, new { codigo });
-			}
+			return (await connection.QueryAsync<Contato, TipoContato, Contato>(
+				query, 
+				(contato, tipoContato) => {
+					contato.TipoContato = tipoContato;
+					return contato;
+				},
+				new { codigo },
+				splitOn: "Codigo",
+				transaction: _dbSession.Transaction)).FirstOrDefault();
 		}
 
 		public async Task<int> Cadastrar(Contato contato)
 		{
-			using (var connection = await ConnectionFactory.ConexaoAsync("Agenda"))
-			{
-				string query = @"
+			IDbConnection connection = await _dbSession.GetConnectionAsync("Agenda");
+			string query = @"
 						INSERT INTO Contato
 							(CodigoPessoa, CodigoTipoContato, Valor)
 						VALUES
@@ -59,17 +113,16 @@ namespace Api.Agenda.DataLayer.Repositories
 						SELECT @@IDENTITY;
 						";
 
-				contato.Codigo = await connection.QueryFirstOrDefaultAsync<int>(query, contato);
+			contato.Codigo = await connection.QueryFirstOrDefaultAsync<int>(query, contato,
+		transaction: _dbSession.Transaction);
 
-				return contato.Codigo;
-			}
+			return contato.Codigo;
 		}
 
 		public async Task<bool> Alterar(Contato contato)
 		{
-			using (var connection = await ConnectionFactory.ConexaoAsync("Agenda"))
-			{
-				string query = @"
+			IDbConnection connection = await _dbSession.GetConnectionAsync("Agenda");
+			string query = @"
 						UPDATE
 							Contato
 						SET
@@ -79,15 +132,14 @@ namespace Api.Agenda.DataLayer.Repositories
 							Codigo = @Codigo;
 						";
 
-				return await connection.ExecuteAsync(query, contato) > 0;
-			}
+			return await connection.ExecuteAsync(query, contato,
+		transaction: _dbSession.Transaction) > 0;
 		}
 
 		public async Task<bool> Desativar(int codigo)
 		{
-			using (var connection = await ConnectionFactory.ConexaoAsync("Agenda"))
-			{
-				string query = @"
+			IDbConnection connection = await _dbSession.GetConnectionAsync("Agenda");
+			string query = @"
 						UPDATE
 							Contato
 						SET
@@ -96,8 +148,8 @@ namespace Api.Agenda.DataLayer.Repositories
 							Codigo = @codigo;
 						";
 
-				return await connection.ExecuteAsync(query, new { codigo }) > 0;
-			}
+			return await connection.ExecuteAsync(query, new { codigo },
+		transaction: _dbSession.Transaction) > 0;
 		}
 	}
 }

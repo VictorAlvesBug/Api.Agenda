@@ -16,7 +16,7 @@ namespace Api.Agenda.Model.Entities
 		public DateTime DataHoraCadastro { get; set; }
 		public bool Ativo { get; set; }
 
-		public Pessoa Pessoa { get; set; }
-		public TipoContato TipoContato { get; set; }
+		public Pessoa? Pessoa { get; set; }
+		public TipoContato? TipoContato { get; set; }
 	}
 }

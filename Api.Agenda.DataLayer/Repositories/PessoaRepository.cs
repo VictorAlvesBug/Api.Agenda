@@ -18,14 +18,55 @@ namespace Api.Agenda.DataLayer.Repositories
 			{
 				string query = @"
 						SELECT
-							*
+							Pessoa.Codigo,
+							Pessoa.Nome,
+							Pessoa.DataHoraCadastro,
+							Pessoa.Ativo,
+							Contato.Codigo,
+							Contato.CodigoPessoa,
+							Contato.CodigoTipoContato,
+							Contato.Valor,
+							Contato.DataHoraCadastro,
+							Contato.Ativo,
+							TipoContato.Codigo,
+							TipoContato.Nome,
+							TipoContato.RegexValidacao,
+							TipoContato.DataHoraCadastro,
+							TipoContato.Ativo
 						FROM
 							Pessoa
+							LEFT JOIN Contato
+								ON Pessoa.Codigo = Contato.CodigoPessoa
+							LEFT JOIN TipoContato
+								ON Contato.CodigoTipoContato = TipoContato.Codigo
 						WHERE
-							Ativo = 1;
+							Pessoa.Ativo = 1;
 						";
 
-				return await connection.QueryAsync<Pessoa>(query);
+				var lookupPessoa = new Dictionary<int, Pessoa>();
+
+				await connection.QueryAsync<Pessoa, Contato, TipoContato, Pessoa>(query,
+					(pessoa, contato, tipoContato) =>
+					{
+
+						if (!lookupPessoa.TryGetValue(pessoa.Codigo, out var pessoaExistente))
+						{
+							pessoaExistente = pessoa;
+							lookupPessoa.Add(pessoa.Codigo, pessoaExistente);
+						}
+
+						pessoaExistente.ListaContatos ??= new List<Contato>();
+
+						if (contato != null)
+						{
+							contato.TipoContato = tipoContato;
+							pessoaExistente.ListaContatos.Add(contato);
+						}
+
+						return null;
+					}, splitOn: "Codigo");
+
+				return lookupPessoa.Values.ToList();
 			}
 		}
 
@@ -35,14 +76,45 @@ namespace Api.Agenda.DataLayer.Repositories
 			{
 				string query = @"
 						SELECT
-							*
+							Pessoa.Codigo,
+							Pessoa.Nome,
+							Pessoa.DataHoraCadastro,
+							Pessoa.Ativo,
+							Contato.Codigo,
+							Contato.CodigoPessoa,
+							Contato.CodigoTipoContato,
+							Contato.Valor,
+							Contato.DataHoraCadastro,
+							Contato.Ativo,
+							TipoContato.Codigo,
+							TipoContato.Nome,
+							TipoContato.RegexValidacao,
+							TipoContato.DataHoraCadastro,
+							TipoContato.Ativo
 						FROM
 							Pessoa
+							LEFT JOIN Contato
+								ON Pessoa.Codigo = Contato.CodigoPessoa
+							LEFT JOIN TipoContato
+								ON Contato.CodigoTipoContato = TipoContato.Codigo
 						WHERE
-							Codigo = @codigo;
+							Pessoa.Codigo = @codigo;
 						";
 
-				return await connection.QueryFirstOrDefaultAsync<Pessoa>(query, new { codigo });
+				var lookupPessoa = new Dictionary<int, Pessoa>();
+
+				return (await connection.QueryAsync<Pessoa, Contato, TipoContato, Pessoa>(query,
+					(pessoa, contato, tipoContato) =>
+					{
+						pessoa.ListaContatos ??= new List<Contato>();
+
+						if (contato != null)
+						{
+							contato.TipoContato = tipoContato;
+							pessoa.ListaContatos.Add(contato);
+						}
+						return pessoa;
+					}, new { codigo }, splitOn: "Codigo")).FirstOrDefault();
 			}
 		}
 
@@ -58,7 +130,9 @@ namespace Api.Agenda.DataLayer.Repositories
 						SELECT @@IDENTITY;
 						";
 
-				return await connection.QueryFirstOrDefaultAsync<int>(query, pessoa);
+				pessoa.Codigo = await connection.QueryFirstOrDefaultAsync<int>(query, pessoa);
+
+				return pessoa.Codigo;
 			}
 		}
 

@@ -59,7 +59,9 @@ namespace Api.Agenda.DataLayer.Repositories
 						SELECT @@IDENTITY;
 						";
 
-				return await connection.QueryFirstOrDefaultAsync<int>(query, contato);
+				contato.Codigo = await connection.QueryFirstOrDefaultAsync<int>(query, contato);
+
+				return contato.Codigo;
 			}
 		}
 

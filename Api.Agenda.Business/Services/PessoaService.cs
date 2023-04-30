@@ -18,26 +18,12 @@ namespace Api.Agenda.Business.Services
 
         public async Task<IEnumerable<Pessoa>> Listar()
 		{
-			var listaPessoas = await _pessoaRepository.Listar();
-
-			foreach (var pessoa in listaPessoas)
-			{
-				pessoa.ListaContatos = await _contatoRepository.Listar(pessoa.Codigo);
-			}
-
-			return listaPessoas;
+			return await _pessoaRepository.Listar();
 		}
 
 		public async Task<Pessoa> Retornar(int codigo)
 		{
-			Pessoa pessoa = await _pessoaRepository.Retornar(codigo);
-
-			if (pessoa == null)
-				return new Pessoa();
-
-			pessoa.ListaContatos = await _contatoRepository.Listar(codigo);
-
-			return pessoa;
+			return await _pessoaRepository.Retornar(codigo);
 		}
 
 		public async Task<bool> Cadastrar(Pessoa pessoa)
@@ -45,30 +31,28 @@ namespace Api.Agenda.Business.Services
 			if(pessoa == null)
 				return false;
 
-			int codigoCadastrado = await _pessoaRepository.Cadastrar(pessoa);
-
-			if(codigoCadastrado == 0)
+			if(await _pessoaRepository.Cadastrar(pessoa) == 0)
 				return false;
 
 			if (pessoa.ListaContatos == null || !pessoa.ListaContatos.Any())
 				return true;
 
-			pessoa.Codigo = codigoCadastrado;
-
-			return await CadastrarContatos(pessoa);
+			return await CadastrarAlterarContatos(pessoa);
 		}
 
-		public async Task<bool> Alterar(Pessoa pessoa)
+		public async Task<bool> Alterar(int codigo, Pessoa pessoa)
 		{
 			if(pessoa == null)
 				return false;
+
+			pessoa.Codigo = codigo;
 
 			bool sucesso = await _pessoaRepository.Alterar(pessoa);
 
 			if (sucesso == false)
 				return false;
 
-			return await AlterarContatos(pessoa);
+			return await CadastrarAlterarContatos(pessoa);
 		}
 
 		public async Task<bool> Desativar(int codigo)
@@ -76,25 +60,7 @@ namespace Api.Agenda.Business.Services
 			return await _pessoaRepository.Desativar(codigo);
 		}
 
-		private async Task<bool> CadastrarContatos(Pessoa pessoa)
-		{
-			bool sucesso = true;
-
-			foreach (Contato contato in pessoa.ListaContatos)
-			{
-
-				if (contato == null)
-				{
-					return false;
-				}
-
-				sucesso &= await _contatoRepository.Cadastrar(contato) > 0;
-			}
-
-			return sucesso;
-		}
-
-		private async Task<bool> AlterarContatos(Pessoa pessoa)
+		private async Task<bool> CadastrarAlterarContatos(Pessoa pessoa)
 		{
 			bool sucesso = true;
 

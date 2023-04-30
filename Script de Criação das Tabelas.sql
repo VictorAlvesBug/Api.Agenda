@@ -1,6 +1,7 @@
 USE master;
 GO
 
+-- DROP DATABASE Agenda
 CREATE DATABASE Agenda;
 GO
 

@@ -1,7 +1,6 @@
 ﻿using Api.Agenda.Business.Services.Interfaces;
 using Api.Agenda.DataLayer.Repositories.Interfaces;
 using Api.Agenda.Model.Entities;
-using System.Linq;
 
 namespace Api.Agenda.Business.Services
 {
@@ -9,11 +8,16 @@ namespace Api.Agenda.Business.Services
 	{
 		private readonly IPessoaRepository _pessoaRepository;
 		private readonly IContatoRepository _contatoRepository;
+		private readonly ITipoContatoRepository _tipoContatoRepository;
 
-		public PessoaService(IPessoaRepository pessoaRepository, IContatoRepository contatoRepository)
+		public PessoaService(
+			IPessoaRepository pessoaRepository,
+			IContatoRepository contatoRepository,
+			ITipoContatoRepository tipoContatoRepository)
         {
 			_pessoaRepository = pessoaRepository;
 			_contatoRepository = contatoRepository;
+			_tipoContatoRepository = tipoContatoRepository;
 		}
 
         public async Task<List<Pessoa>> Listar()
@@ -21,9 +25,9 @@ namespace Api.Agenda.Business.Services
 			return await _pessoaRepository.Listar();
 		}
 
-		public async Task<Pessoa> Retornar(int codigo)
+		public async Task<Pessoa> Retornar(int codigoPessoa)
 		{
-			return await _pessoaRepository.Retornar(codigo);
+			return await _pessoaRepository.Retornar(codigoPessoa);
 		}
 
 		public async Task<bool> Cadastrar(Pessoa pessoa)
@@ -40,12 +44,10 @@ namespace Api.Agenda.Business.Services
 			return await CadastrarAlterarContatos(pessoa);
 		}
 
-		public async Task<bool> Alterar(int codigo, Pessoa pessoa)
+		public async Task<bool> Alterar(Pessoa pessoa)
 		{
 			if(pessoa == null)
 				return false;
-
-			pessoa.Codigo = codigo;
 
 			bool sucesso = await _pessoaRepository.Alterar(pessoa);
 
@@ -55,9 +57,9 @@ namespace Api.Agenda.Business.Services
 			return await CadastrarAlterarContatos(pessoa);
 		}
 
-		public async Task<bool> Desativar(int codigo)
+		public async Task<bool> Desativar(int codigoPessoa)
 		{
-			return await _pessoaRepository.Desativar(codigo);
+			return await _pessoaRepository.Desativar(codigoPessoa);
 		}
 
 		private async Task<bool> CadastrarAlterarContatos(Pessoa pessoa)
@@ -70,13 +72,14 @@ namespace Api.Agenda.Business.Services
 
 				foreach (var codigoContatoAntigo in listaCodigoContatosAntigos)
 				{
-					sucesso &= await _contatoRepository.Desativar(codigoContatoAntigo);
+					sucesso = sucesso && await _contatoRepository.Desativar(pessoa.Codigo, codigoContatoAntigo);
 				}
 
 				foreach (var contatoNovo in pessoa.ListaContatos)
 				{
 					contatoNovo.CodigoPessoa = pessoa.Codigo;
-					sucesso &= await _contatoRepository.Cadastrar(contatoNovo) > 0;
+					sucesso = sucesso && await _tipoContatoRepository.Retornar(contatoNovo.CodigoTipoContato) != null;
+					sucesso = sucesso && await _contatoRepository.Cadastrar(contatoNovo) > 0;
 				}
 			}
 
@@ -95,7 +98,7 @@ namespace Api.Agenda.Business.Services
 			return strComparacaoContatosAntigos != strComparacaoContatosNovos;
 		}
 
-		private string RetornarStringComparacaoContatos(List<Contato> listaContatos)
+		private static string RetornarStringComparacaoContatos(List<Contato> listaContatos)
 		{
 			if (listaContatos == null)
 				return string.Empty;

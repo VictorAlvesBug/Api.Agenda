@@ -1,5 +1,4 @@
-﻿using Api.Agenda.Business.Services.Interfaces;
-using Api.Agenda.DataLayer.Repositories;
+﻿using Api.Agenda.DataLayer.Repositories;
 using Api.Agenda.DataLayer.Repositories.Interfaces;
 
 namespace Api.Agenda.Initializers

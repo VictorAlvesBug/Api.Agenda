@@ -1,13 +1,7 @@
-﻿using Api.Agenda.DataLayer.ConnectionFactories;
-using Api.Agenda.DataLayer.Repositories.Interfaces;
+﻿using Api.Agenda.DataLayer.Repositories.Interfaces;
 using Api.Agenda.Model.Entities;
 using Dapper;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Api.Agenda.DataLayer.Repositories
 {
@@ -40,6 +34,7 @@ namespace Api.Agenda.DataLayer.Repositories
 							Contato
 							INNER JOIN TipoContato
 								ON Contato.CodigoTipoContato = TipoContato.Codigo
+								AND TipoContato.Ativo = 1
 						WHERE
 							Contato.Ativo = 1
 							AND Contato.CodigoPessoa = @codigoPessoa;
@@ -47,10 +42,10 @@ namespace Api.Agenda.DataLayer.Repositories
 
 			var lookupContato = new Dictionary<int, Contato>();
 
-			await connection.QueryAsync<Contato, TipoContato, Contato>(query, 
-				(contato, tipoContato) => 
+			await connection.QueryAsync<Contato, TipoContato, Contato>(query,
+				(contato, tipoContato) =>
 				{
-					if(!lookupContato.TryGetValue(contato.Codigo, out var contatoExistente))
+					if (!lookupContato.TryGetValue(contato.Codigo, out var contatoExistente))
 					{
 						contatoExistente = contato;
 						lookupContato.Add(contato.Codigo, contatoExistente);
@@ -61,13 +56,13 @@ namespace Api.Agenda.DataLayer.Repositories
 					return null;
 				},
 				new { codigoPessoa },
-				splitOn:"Codigo",
+				splitOn: "Codigo",
 				transaction: _dbSession.Transaction);
 
 			return lookupContato.Values.ToList();
 		}
 
-		public async Task<Contato> Retornar(int codigo)
+		public async Task<Contato> Retornar(int codigoPessoa, int codigoContato)
 		{
 			IDbConnection connection = await _dbSession.GetConnectionAsync("Agenda");
 			string query = @"
@@ -87,17 +82,22 @@ namespace Api.Agenda.DataLayer.Repositories
 							Contato
 							INNER JOIN TipoContato
 								ON Contato.CodigoTipoContato = TipoContato.Codigo
+								AND TipoContato.Ativo = 1
 						WHERE
-							Contato.Codigo = @codigo;
+							
+							Contato.Ativo = 1
+							AND Contato.Codigo = @codigoContato
+							AND Contato.CodigoPessoa = @codigoPessoa;
 						";
 
 			return (await connection.QueryAsync<Contato, TipoContato, Contato>(
-				query, 
-				(contato, tipoContato) => {
+				query,
+				(contato, tipoContato) =>
+				{
 					contato.TipoContato = tipoContato;
 					return contato;
 				},
-				new { codigo },
+				new { codigoPessoa, codigoContato },
 				splitOn: "Codigo",
 				transaction: _dbSession.Transaction)).FirstOrDefault();
 		}
@@ -132,11 +132,13 @@ namespace Api.Agenda.DataLayer.Repositories
 							Codigo = @Codigo;
 						";
 
-			return await connection.ExecuteAsync(query, contato,
-		transaction: _dbSession.Transaction) > 0;
+			return await connection.ExecuteAsync(
+				query,
+				contato,
+				transaction: _dbSession.Transaction) > 0;
 		}
 
-		public async Task<bool> Desativar(int codigo)
+		public async Task<bool> Desativar(int codigoPessoa, int codigoContato)
 		{
 			IDbConnection connection = await _dbSession.GetConnectionAsync("Agenda");
 			string query = @"
@@ -145,11 +147,18 @@ namespace Api.Agenda.DataLayer.Repositories
 						SET
 							Ativo = 0
 						WHERE
-							Codigo = @codigo;
+							Codigo = @codigoContato
+							AND CodigoPessoa = @codigoPessoa;
 						";
 
-			return await connection.ExecuteAsync(query, new { codigo },
-		transaction: _dbSession.Transaction) > 0;
+			return await connection.ExecuteAsync(
+				query,
+				new
+				{
+					codigoPessoa,
+					codigoContato
+				},
+				transaction: _dbSession.Transaction) > 0;
 		}
 	}
 }

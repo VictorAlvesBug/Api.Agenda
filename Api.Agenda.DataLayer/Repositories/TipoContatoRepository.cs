@@ -1,13 +1,7 @@
-﻿using Api.Agenda.DataLayer.ConnectionFactories;
-using Api.Agenda.DataLayer.Repositories.Interfaces;
+﻿using Api.Agenda.DataLayer.Repositories.Interfaces;
 using Api.Agenda.Model.Entities;
 using Dapper;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Api.Agenda.DataLayer.Repositories
 {
@@ -37,7 +31,7 @@ namespace Api.Agenda.DataLayer.Repositories
 					transaction: _dbSession.Transaction)).ToList();
 		}
 
-		public async Task<TipoContato> Retornar(int codigo)
+		public async Task<TipoContato> Retornar(int codigoTipoContato)
 		{
 			IDbConnection connection = await _dbSession.GetConnectionAsync("Agenda");
 			string query = @"
@@ -46,12 +40,13 @@ namespace Api.Agenda.DataLayer.Repositories
 						FROM
 							TipoContato
 						WHERE
-							Codigo = @codigo;
+							Ativo = 1
+							AND Codigo = @codigoTipoContato;
 						";
 
 				return await connection.QueryFirstOrDefaultAsync<TipoContato>(
 					query, 
-					new { codigo }, 
+					new { codigoTipoContato }, 
 					transaction: _dbSession.Transaction);
 		}
 
@@ -93,7 +88,7 @@ namespace Api.Agenda.DataLayer.Repositories
 					transaction: _dbSession.Transaction) > 0;
 		}
 
-		public async Task<bool> Desativar(int codigo)
+		public async Task<bool> Desativar(int codigoTipoContato)
 		{
 			IDbConnection connection = await _dbSession.GetConnectionAsync("Agenda");
 			string query = @"
@@ -102,12 +97,12 @@ namespace Api.Agenda.DataLayer.Repositories
 						SET
 							Ativo = 0
 						WHERE
-							Codigo = @codigo;
+							Codigo = @codigoTipoContato;
 						";
 
 				return await connection.ExecuteAsync(
 					query, 
-					new { codigo }, 
+					new { codigoTipoContato }, 
 					transaction: _dbSession.Transaction) > 0;
 		}
 	}

@@ -1,8 +1,7 @@
-﻿using Api.Agenda.Business.Services.Interfaces;
+﻿using Api.Agenda.Business.Services;
+using Api.Agenda.Business.Services.Interfaces;
 using Api.Agenda.Model.Entities;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Reflection;
 
 namespace Api.Agenda.Controllers
 {
@@ -32,7 +31,7 @@ namespace Api.Agenda.Controllers
 				if (listaTiposContato == null)
 				{
 					_unitOfWork.Rollback();
-					return NotFound();
+					return NotFound(new { erro = "Lista de tipos de contato não encontrada" });
 				}
 
 				var links = new List<Link>
@@ -79,7 +78,7 @@ namespace Api.Agenda.Controllers
 				if (tipoContato == null)
 				{
 					_unitOfWork.Rollback();
-					return NotFound();
+					return NotFound(new { erro = "Tipo de contato não encontrado" });
 				}
 
 				var links = new List<Link>
@@ -115,6 +114,11 @@ namespace Api.Agenda.Controllers
 		{
 			try
 			{
+				if(!tipoContato.EhValido(out string mensagemErro))
+				{
+					return BadRequest(new { erro = mensagemErro });
+				}
+
 				_unitOfWork.BeginTransaction();
 
 				if (await _tipoContatoService.Cadastrar(tipoContato))
@@ -142,7 +146,7 @@ namespace Api.Agenda.Controllers
 				}
 
 				_unitOfWork.Rollback();
-				return NotFound();
+				return BadRequest(new { erro = "Erro ao cadastrar tipo de contato" });
 			}
 			catch (Exception ex)
 			{
@@ -156,9 +160,21 @@ namespace Api.Agenda.Controllers
 		{
 			try
 			{
+				if (!tipoContato.EhValido(out string mensagemErro))
+				{
+					return BadRequest(new { erro = mensagemErro });
+				}
 				_unitOfWork.BeginTransaction();
 
-				if (await _tipoContatoService.Alterar(codigoTipoContato, tipoContato))
+				if (await _tipoContatoService.Retornar(codigoTipoContato) == null)
+				{
+					_unitOfWork.Rollback();
+					return NotFound(new { erro = "Tipo de contato não encontrado" });
+				}
+
+				tipoContato.Codigo = codigoTipoContato;
+
+				if (await _tipoContatoService.Alterar(tipoContato))
 				{
 					var links = new List<Link>
 					{
@@ -183,7 +199,7 @@ namespace Api.Agenda.Controllers
 				}
 
 				_unitOfWork.Rollback();
-				return NotFound();
+				return BadRequest(new { erro = "Erro ao alterar tipo de contato" });
 			}
 			catch (Exception ex)
 			{
@@ -199,6 +215,12 @@ namespace Api.Agenda.Controllers
 			{
 				_unitOfWork.BeginTransaction();
 
+				if (await _tipoContatoService.Retornar(codigoTipoContato) == null)
+				{
+					_unitOfWork.Rollback();
+					return NotFound(new { erro = "Tipo de contato não encontrado" });
+				}
+
 				if (await _tipoContatoService.Desativar(codigoTipoContato))
 				{
 					_unitOfWork.Commit();
@@ -206,7 +228,7 @@ namespace Api.Agenda.Controllers
 				}
 
 				_unitOfWork.Rollback();
-				return NotFound();
+				return BadRequest(new { erro = "Erro ao desativar tipo de contato" });
 			}
 			catch (Exception ex)
 			{

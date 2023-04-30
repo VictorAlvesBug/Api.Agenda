@@ -1,7 +1,6 @@
 ﻿using Api.Agenda.Business.Services.Interfaces;
 using Api.Agenda.DataLayer.Repositories.Interfaces;
 using Api.Agenda.Model.Entities;
-using System.Linq;
 
 namespace Api.Agenda.Business.Services
 {
@@ -19,9 +18,9 @@ namespace Api.Agenda.Business.Services
 			return await _tipoContatoRepository.Listar();
 		}
 
-		public async Task<TipoContato> Retornar(int codigo)
+		public async Task<TipoContato> Retornar(int codigoTipoContato)
 		{
-			return await _tipoContatoRepository.Retornar(codigo);
+			return await _tipoContatoRepository.Retornar(codigoTipoContato);
 		}
 
 		public async Task<bool> Cadastrar(TipoContato tipoContato)
@@ -32,19 +31,17 @@ namespace Api.Agenda.Business.Services
 			return await _tipoContatoRepository.Cadastrar(tipoContato) > 0;
 		}
 
-		public async Task<bool> Alterar(int codigo, TipoContato tipoContato)
+		public async Task<bool> Alterar(TipoContato tipoContato)
 		{
 			if(tipoContato == null)
 				return false;
 
-			tipoContato.Codigo = codigo;
-
 			return await _tipoContatoRepository.Alterar(tipoContato);
 		}
 
-		public async Task<bool> Desativar(int codigo)
+		public async Task<bool> Desativar(int codigoTipoContato)
 		{
-			return await _tipoContatoRepository.Desativar(codigo);
+			return await _tipoContatoRepository.Desativar(codigoTipoContato);
 		}
 	}
 }

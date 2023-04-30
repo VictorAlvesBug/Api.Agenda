@@ -1,11 +1,6 @@
 ﻿using Api.Agenda.DataLayer.ConnectionFactories;
 using Api.Agenda.DataLayer.Repositories.Interfaces;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Api.Agenda.DataLayer.DatabaseConnection
 {

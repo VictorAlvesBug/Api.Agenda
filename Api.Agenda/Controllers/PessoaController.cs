@@ -1,8 +1,7 @@
-﻿using Api.Agenda.Business.Services.Interfaces;
+﻿using Api.Agenda.Business.Services;
+using Api.Agenda.Business.Services.Interfaces;
 using Api.Agenda.Model.Entities;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Reflection;
 
 namespace Api.Agenda.Controllers
 {
@@ -11,12 +10,15 @@ namespace Api.Agenda.Controllers
 	public class PessoaController : ControllerBase
 	{
 		private readonly IPessoaService _pessoaService;
+		private readonly ITipoContatoService _tipoContatoService;
 		private readonly IUnitOfWork _unitOfWork;
 		public PessoaController(
 			IPessoaService pessoaService,
+			ITipoContatoService tipoContatoService,
 			IUnitOfWork unitOfWork)
 		{
 			_pessoaService = pessoaService;
+			_tipoContatoService = tipoContatoService;
 			_unitOfWork = unitOfWork;
 		}
 
@@ -32,7 +34,7 @@ namespace Api.Agenda.Controllers
 				if (listaPessoas == null)
 				{
 					_unitOfWork.Rollback();
-					return NotFound();
+					return NotFound(new { erro = "Lista de pessoas não encontrada" });
 				}
 
 				var links = new List<Link>
@@ -86,7 +88,7 @@ namespace Api.Agenda.Controllers
 				if (pessoa == null)
 				{
 					_unitOfWork.Rollback();
-					return NotFound();
+					return NotFound(new { erro = "Pessoa não encontrada" });
 				}
 
 				var links = new List<Link>
@@ -130,6 +132,25 @@ namespace Api.Agenda.Controllers
 			{
 				_unitOfWork.BeginTransaction();
 
+				foreach(var contato in pessoa.ListaContatos)
+				{
+					var tipoContato = await _tipoContatoService.Retornar(contato.CodigoTipoContato);
+
+					if (tipoContato == null)
+					{
+						_unitOfWork.Rollback();
+						return NotFound(new { erro = "Tipo de contato não encontrado" });
+					}
+					contato.TipoContato = tipoContato;
+					contato.CodigoPessoa = pessoa.Codigo;
+				}
+
+				if (!pessoa.EhValida(out string mensagemErro))
+				{
+					_unitOfWork.Rollback();
+					return BadRequest(new { erro = mensagemErro });
+				}
+
 				if (await _pessoaService.Cadastrar(pessoa))
 				{
 					var links = new List<Link>
@@ -161,7 +182,7 @@ namespace Api.Agenda.Controllers
 				}
 
 				_unitOfWork.Rollback();
-				return NotFound();
+				return BadRequest(new { erro = "Erro ao cadastrar pessoa" });
 			}
 			catch (Exception ex)
 			{
@@ -177,7 +198,34 @@ namespace Api.Agenda.Controllers
 			{
 				_unitOfWork.BeginTransaction();
 
-				if (await _pessoaService.Alterar(codigoPessoa, pessoa))
+				if (await _pessoaService.Retornar(codigoPessoa) == null)
+				{
+					_unitOfWork.Rollback();
+					return NotFound(new { erro = "Pessoa não encontrada" });
+				}
+
+				pessoa.Codigo = codigoPessoa;
+
+				foreach (var contato in pessoa.ListaContatos)
+				{
+					var tipoContato = await _tipoContatoService.Retornar(contato.CodigoTipoContato);
+
+					if (tipoContato == null)
+					{
+						_unitOfWork.Rollback();
+						return NotFound(new { erro = "Tipo de contato não encontrado" });
+					}
+					contato.TipoContato = tipoContato;
+					contato.CodigoPessoa = pessoa.Codigo;
+				}
+
+				if (!pessoa.EhValida(out string mensagemErro))
+				{
+					return BadRequest(new { erro = mensagemErro });
+				}
+
+
+				if (await _pessoaService.Alterar(pessoa))
 				{
 					var links = new List<Link>
 					{
@@ -208,7 +256,7 @@ namespace Api.Agenda.Controllers
 				}
 
 				_unitOfWork.Rollback();
-				return NotFound();
+				return BadRequest(new { erro = "Erro ao alterar pessoa" });
 			}
 			catch (Exception ex)
 			{
@@ -224,6 +272,12 @@ namespace Api.Agenda.Controllers
 			{
 				_unitOfWork.BeginTransaction();
 
+				if (await _pessoaService.Retornar(codigoPessoa) == null)
+				{
+					_unitOfWork.Rollback();
+					return NotFound(new { erro = "Pessoa não encontrada" });
+				}
+
 				if (await _pessoaService.Desativar(codigoPessoa))
 				{
 					_unitOfWork.Commit();
@@ -231,7 +285,7 @@ namespace Api.Agenda.Controllers
 				}
 
 				_unitOfWork.Rollback();
-				return NotFound();
+				return BadRequest(new { erro = "Erro ao desativar pessoa" });
 			}
 			catch (Exception ex)
 			{

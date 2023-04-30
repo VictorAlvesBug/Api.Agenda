@@ -31,7 +31,7 @@ namespace Api.Agenda.DataLayer.ConnectionFactories
 
 			SqlConnection con = new SqlConnection(connectionString);
 
-			con.OpenAsync();
+			await con.OpenAsync();
 
 			return con;
 		}

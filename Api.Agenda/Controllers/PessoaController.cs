@@ -14,7 +14,6 @@ namespace Api.Agenda.Controllers
 		public PessoaController(IPessoaService pessoaService)
 		{
 			_pessoaService = pessoaService;
-
 		}
 
 		[HttpGet]
@@ -22,7 +21,7 @@ namespace Api.Agenda.Controllers
 		{
 			try
 			{
-				List<Pessoa> listaPessoas = (await _pessoaService.Listar()).ToList();
+				List<Pessoa> listaPessoas = await _pessoaService.Listar();
 
 				if (listaPessoas == null)
 				{

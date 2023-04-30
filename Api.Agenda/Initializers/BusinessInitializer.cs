@@ -11,6 +11,7 @@ namespace Api.Agenda.Initializers
 		{
 			services.AddTransient<IPessoaService, PessoaService>();
 			services.AddTransient<IContatoService, ContatoService>();
+			services.AddTransient<ITipoContatoService, TipoContatoService>();
 		}
 	}
 }

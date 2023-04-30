@@ -13,7 +13,6 @@ namespace Api.Agenda.Controllers
 		public ContatoController(IContatoService contatoService)
 		{
 			_contatoService = contatoService;
-
 		}
 
 		[HttpGet("{codigoPessoa}/contatos")]
@@ -21,7 +20,7 @@ namespace Api.Agenda.Controllers
 		{
 			try
 			{
-				List<Contato> listaContatos = (await _contatoService.Listar(codigoPessoa)).ToList();
+				List<Contato> listaContatos = await _contatoService.Listar(codigoPessoa);
 
 				if (listaContatos == null)
 				{

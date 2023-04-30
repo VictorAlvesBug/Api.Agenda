@@ -58,7 +58,9 @@ namespace Api.Agenda.DataLayer.Repositories
 						SELECT @@IDENTITY;
 						";
 
-				return await connection.QueryFirstOrDefaultAsync<int>(query, tipoContato);
+				tipoContato.Codigo = await connection.QueryFirstOrDefaultAsync<int>(query, tipoContato);
+
+				return tipoContato.Codigo;
 			}
 		}
 
@@ -70,9 +72,8 @@ namespace Api.Agenda.DataLayer.Repositories
 						UPDATE
 							TipoContato
 						SET
-							CodigoPessoa = @CodigoPessoa,
-							CodigoTipoContato = @CodigoTipoContato,
-							Valor = @Valor
+							Nome = @Nome,
+							RegexValidacao = @RegexValidacao
 						WHERE
 							Codigo = @Codigo;
 						";

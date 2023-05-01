@@ -10,6 +10,14 @@ new BusinessInitializer().Initialize(builder.Services);
 new DataLayerInitializer().Initialize(builder.Services);
 new UnitOfWorkInitializer().Initialize(builder.Services);
 
+builder.Services.AddCors(options =>
+{
+	options.AddPolicy("AllowAnyOrigin",
+		builder => builder.AllowAnyOrigin()
+						  .AllowAnyHeader()
+						  .AllowAnyMethod());
+});
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -21,6 +29,7 @@ if (app.Environment.IsDevelopment())
 {
 	app.UseSwagger();
 	app.UseSwaggerUI();
+	app.UseCors("AllowAnyOrigin");
 }
 
 app.UseHttpsRedirection();

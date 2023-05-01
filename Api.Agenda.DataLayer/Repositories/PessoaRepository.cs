@@ -108,21 +108,31 @@ namespace Api.Agenda.DataLayer.Repositories
 
 			var lookupPessoa = new Dictionary<int, Pessoa>();
 
-			return (await connection.QueryAsync<Pessoa, Contato, TipoContato, Pessoa>(query,
+			await connection.QueryAsync<Pessoa, Contato, TipoContato, Pessoa>(query,
 				(pessoa, contato, tipoContato) =>
 				{
-					pessoa.ListaContatos ??= new List<Contato>();
+
+					if (!lookupPessoa.TryGetValue(pessoa.Codigo, out var pessoaExistente))
+					{
+						pessoaExistente = pessoa;
+						lookupPessoa.Add(pessoa.Codigo, pessoaExistente);
+					}
+
+					pessoaExistente.ListaContatos ??= new List<Contato>();
 
 					if (contato != null)
 					{
 						contato.TipoContato = tipoContato;
-						pessoa.ListaContatos.Add(contato);
+						pessoaExistente.ListaContatos.Add(contato);
 					}
-					return pessoa;
+
+					return null;
 				}, 
-				new { codigoPessoa }, 
+				new { codigoPessoa },
 				splitOn: "Codigo",
-				transaction: _dbSession.Transaction)).FirstOrDefault();
+				transaction: _dbSession.Transaction);
+
+			return lookupPessoa.Values.FirstOrDefault();
 		}
 
 		public async Task<int> Cadastrar(Pessoa pessoa)

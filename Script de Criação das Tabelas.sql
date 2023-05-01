@@ -1,13 +1,11 @@
-USE master;
-GO
-
--- DROP DATABASE Agenda
+-- USE master; DROP DATABASE Agenda
 CREATE DATABASE Agenda;
 GO
 
 USE Agenda;
 GO
 
+-- DROP TABLE Pessoa
 CREATE TABLE Pessoa
 (
 	Codigo INT PRIMARY KEY IDENTITY(1,1),
@@ -17,6 +15,7 @@ CREATE TABLE Pessoa
 );
 GO
 
+-- DROP TABLE TipoContato
 CREATE TABLE TipoContato
 (
 	Codigo INT PRIMARY KEY IDENTITY(1,1),
@@ -33,7 +32,8 @@ VALUES
 	('Telefone', '^\d{2}\d{8,9}$'),
 	('E-mail', '^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$'),
 	('WhatsApp', '^\d{2}\d{2}\d{8,9}$');
-
+	
+-- DROP TABLE Contato
 CREATE TABLE Contato
 (
 	Codigo INT PRIMARY KEY IDENTITY(1,1),

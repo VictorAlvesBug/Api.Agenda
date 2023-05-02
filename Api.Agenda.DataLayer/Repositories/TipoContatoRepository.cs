@@ -105,5 +105,30 @@ namespace Api.Agenda.DataLayer.Repositories
 					new { codigoTipoContato }, 
 					transaction: _dbSession.Transaction) > 0;
 		}
+
+		public async Task<bool> PossuiContatosAtivos(int codigoTipoContato)
+		{
+			IDbConnection connection = await _dbSession.GetConnectionAsync("Agenda");
+			string query = @"
+						SELECT
+							COUNT(*)
+						FROM
+							TipoContato
+							INNER JOIN Contato
+								ON TipoContato.Codigo = Contato.CodigoTipoContato
+								AND Contato.Ativo = 1
+							INNER JOIN Pessoa
+								ON Contato.CodigoPessoa = Pessoa.Codigo
+								AND Pessoa.Ativo = 1
+						WHERE
+							TipoContato.Ativo = 1
+							AND TipoContato.Codigo = @codigoTipoContato;
+						";
+
+			return await connection.QueryFirstOrDefaultAsync<int>(
+				query,
+				new { codigoTipoContato },
+				transaction: _dbSession.Transaction) > 0;
+		}
 	}
 }

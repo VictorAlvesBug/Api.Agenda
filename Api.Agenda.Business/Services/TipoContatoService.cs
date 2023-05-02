@@ -43,5 +43,10 @@ namespace Api.Agenda.Business.Services
 		{
 			return await _tipoContatoRepository.Desativar(codigoTipoContato);
 		}
+
+		public async Task<bool> PossuiContatosAtivos(int codigoTipoContato)
+		{
+			return await _tipoContatoRepository.PossuiContatosAtivos(codigoTipoContato);
+		}
 	}
 }

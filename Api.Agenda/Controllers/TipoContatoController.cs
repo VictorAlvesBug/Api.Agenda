@@ -221,6 +221,12 @@ namespace Api.Agenda.Controllers
 					return NotFound(new { erro = "Tipo de contato não encontrado" });
 				}
 
+				if (await _tipoContatoService.PossuiContatosAtivos(codigoTipoContato))
+				{
+					_unitOfWork.Rollback();
+					return Conflict(new { erro = "Tipo de contato vinculado a um ou mais contatos" });
+				}
+
 				if (await _tipoContatoService.Desativar(codigoTipoContato))
 				{
 					_unitOfWork.Commit();

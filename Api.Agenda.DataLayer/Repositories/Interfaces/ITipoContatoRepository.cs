@@ -9,5 +9,6 @@ namespace Api.Agenda.DataLayer.Repositories.Interfaces
 		Task<int> Cadastrar(TipoContato tipoContato);
 		Task<bool> Alterar(TipoContato tipoContato);
 		Task<bool> Desativar(int codigoTipoContato);
+		Task<bool> PossuiContatosAtivos(int codigoTipoContato);
 	}
 }

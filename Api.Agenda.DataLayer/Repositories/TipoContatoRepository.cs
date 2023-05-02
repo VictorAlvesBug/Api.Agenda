@@ -58,7 +58,7 @@ namespace Api.Agenda.DataLayer.Repositories
 							(Nome, RegexValidacao)
 						VALUES
 							(@Nome, @RegexValidacao);
-						SELECT @@IDENTITY;
+						SELECT LAST_INSERT_ID();
 						";
 
 				tipoContato.Codigo = await connection.QueryFirstOrDefaultAsync<int>(

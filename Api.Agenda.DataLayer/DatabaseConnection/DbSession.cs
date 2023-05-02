@@ -9,7 +9,7 @@ namespace Api.Agenda.DataLayer.DatabaseConnection
 		public IDbConnection Connection { get; set; }
 		public IDbTransaction Transaction { get; set; }
 
-		public DbSession(string banco = "master")
+		public DbSession(string banco = "railway")
 		{
 			Task.Run(() => GenerateSessionDB(banco)).Wait();
 		}

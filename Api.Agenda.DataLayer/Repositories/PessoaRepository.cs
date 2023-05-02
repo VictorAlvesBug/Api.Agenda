@@ -143,7 +143,7 @@ namespace Api.Agenda.DataLayer.Repositories
 							(Nome)
 						VALUES
 							(@Nome);
-						SELECT @@IDENTITY;
+						SELECT LAST_INSERT_ID();
 						";
 
 			pessoa.Codigo = await connection.QueryFirstOrDefaultAsync<int>(

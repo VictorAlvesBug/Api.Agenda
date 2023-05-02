@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "13354163-1191-4b00-8104-4d06ef0a23a6",
+		"_postman_id": "6f3b1283-7164-4e32-9b80-e247f69f7178",
 		"name": "Api.Agenda",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "6063645"
@@ -1581,36 +1581,6 @@
 					"response": []
 				},
 				{
-					"name": "Alterar (Válido - tipo de contato não encontrado)",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n  \"nome\": \"Telegrama\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "https://localhost:44353/api/tiposcontato/999",
-							"protocol": "https",
-							"host": [
-								"localhost"
-							],
-							"port": "44353",
-							"path": [
-								"api",
-								"tiposcontato",
-								"999"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "Alterar (Válido - tipo de contato sem regex)",
 					"request": {
 						"method": "PUT",
@@ -1665,6 +1635,36 @@
 								"api",
 								"tiposcontato",
 								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Alterar (Inválido - tipo de contato não encontrado)",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"nome\": \"Telegrama\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:44353/api/tiposcontato/999",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "44353",
+							"path": [
+								"api",
+								"tiposcontato",
+								"999"
 							]
 						}
 					},

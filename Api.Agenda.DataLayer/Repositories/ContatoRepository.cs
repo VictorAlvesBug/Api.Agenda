@@ -110,7 +110,7 @@ namespace Api.Agenda.DataLayer.Repositories
 							(CodigoPessoa, CodigoTipoContato, Valor)
 						VALUES
 							(@CodigoPessoa, @CodigoTipoContato, @Valor);
-						SELECT @@IDENTITY;
+						SELECT LAST_INSERT_ID();
 						";
 
 			contato.Codigo = await connection.QueryFirstOrDefaultAsync<int>(query, contato,

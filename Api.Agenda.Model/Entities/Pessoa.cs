@@ -34,7 +34,7 @@ namespace Api.Agenda.Model.Entities
 		{
 			bool ehValido = true;
 			ehValido = ehValido && !string.IsNullOrEmpty(Nome);
-			ehValido = ehValido && Nome.Length > 3;
+			ehValido = ehValido && Nome.Length >= 3;
 			ehValido = ehValido && Nome.Length <= 100;
 
 			mensagemErro = string.Empty;
